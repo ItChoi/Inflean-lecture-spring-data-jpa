@@ -1,0 +1,100 @@
+HELP.md
+.gradle
+build/
+!gradle/wrapper/gradle-wrapper.jar
+!**/src/main/**
+!**/src/test/**
+
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+out/
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+
+### VS Code ###
+.vscode/
+
+
+[200~### copy ###
+HELP.md
+!gradle/wrapper/gradle-wrapper.jar
+!**/src/main/**
+!**/src/test/**
+
+# properties files
+*.properties
+
+# comfiled class files
+*.class
+
+# log files
+*.log
+
+# package files
+*.jar
+*.war
+*.nar
+*.ear
+*.zip
+*.tar.gz
+*.rar
+
+.metadata
+Spring Elements
+
+# gradle
+.gradle
+/build/
+build/
+
+
+# Eclipse
+.apt_generated
+.factorypath
+.sts4-cache
+.classpath
+.project
+.settings
+.springBeans
+/bin
+
+.ssh
+
+# intellij idea
+.idea
+*.iws
+*.iml
+*.ipr
+out/
+
+# NetBeans
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+
+# vs code
+.vscode/
+
+gradlew.bat
+gradlew
+
+

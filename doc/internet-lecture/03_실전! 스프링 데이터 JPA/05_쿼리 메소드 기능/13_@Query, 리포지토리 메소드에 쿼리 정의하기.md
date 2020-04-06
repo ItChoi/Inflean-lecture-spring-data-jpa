@@ -1,0 +1,11 @@
+## @Query, 리포지토리 메소드에 쿼리 정의하기
+- @Query("select m from Member m where m.username = :username and m.age = :age") List<Member> findUser(@Param("username") String username, @Param("age") int age);
+  - 인터페이스에 바로 적용할 수 있다!
+  - 메소드에 JPQL 쿼리 작성
+  - 실무에서 많이 쓴다. 장점이 많다.
+  - 엄청난 장점! 
+    - 문자열 안에 오타를 쳐도 애플리케이션 로딩 시점에 오류가 발생한다! 
+    - @Query 안에 정의한 것은 이름이 없는 네임드 쿼리라 보면 된다. 정적 쿼리를 미리 파싱해놨을 때 에러가 있는건 판단 가능 
+    - 좋아하고 권장하는 기능 ㅎㅎㅎ
+- 결론: 동적 쿼리는 QueryDSL을 사용하자!
+  - 가장 깔끔하고 유지보수성이 좋다.
