@@ -1,0 +1,12 @@
+## @EntityGraph
+- 연관된 엔티티들을 SQL 한번에 조회하는 방법
+- fetch join이 뭐고 어떻게 동작하나?
+- 스플이 데이터 JPA는 JPQL로 fetch join을 사용하기보단 더 편하게 사용하기 위해 @EntityGraph를 사용한다.
+  - findByUsername 같이 메소드 이름으로 하면서 페치 조인 까지 같이 하게 해준다.
+- @EntityGraph
+  - @EntityGraph(attributePaths = {"team"}) List<Member> findAll();
+  - 내부적으로는 fetch join을 사용하는 거다!
+  - JPQL + @EntityGraph 사용도 가능
+  - @EntityGraph(attributePaths = {"team"}) List<Member> findEntityGraphByUsername(@Param("username") String username);
+- @EntityGraph를 쓰면 fetch join을 편하게 쓸 수 있다. JPA에서 제공하는 기능, 표준 스펙 2.2에서부터 들어가는데, jpa에 @NamedEntityGraph(name = "Member.all", attributeNodes = @NamedAttributeNode("team"))
+- @EntityGraph는 김영한님 개인적으로는 간단할 떄 쓰고, fetch join을 쓴다. 쿼리가 복잡해지면 JPQL 안에서 fetch join으로 해결! 간단한거 할땐 @EntityGraph를 사용해도 좋다~

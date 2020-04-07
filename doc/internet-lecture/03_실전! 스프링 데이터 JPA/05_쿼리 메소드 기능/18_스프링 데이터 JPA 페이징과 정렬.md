@@ -1,0 +1,22 @@
+## 스프링 데이터 JPA 페이징과 정렬
+- RDB는 몽고디비든 공통화! -> 정렬, 페이징 (Sort, Pageable)
+- **특별한 반환 타입**
+  - Page -> 추가 count 쿼리 결과를 포함하는 페이징
+  - Slice -> 추가 count 쿼리 없이 다음 페이지만 확인 기능 (내부적으로 limit + 1조회) (더보기)
+  - List (자바 컬렉션): 추가 count 쿼리 없이 결과만 반환
+- Page<Member> findByAge(int age, Pageable pageable);
+  - 파라미터로 pageable을 넘기고 반환 타입을 Page로 해주면, !!
+- page Index 0부터 시작, 스프링 데이터 JPA는 0부터 시작!
+- PageRequest pageRequest = PageRequest.of(0, 3, Sort.by(Sort.Direction.DESC, "username")); 
+  - 대박 이러면 끝~
+- 반환 타입을 List로 하고 Pageable을 파라미터로 넘겨도 된다! 해당 반환 타입의 메소드는 사용 못하지만 원하는 데이터 수를 얻을 수 있다.
+- 실무에서 페이징 쿼리가, ... totalCount 를 잘 짜야할 때가 있다. 데이터 쿼리랑 카운트 쿼리를 분리해야 하는 경우가 있다. 
+- 카운트 쿼리 분리 하는 방법 제공한다. 
+- where 조건이 복잡해지면 Sort로 해결이 안되는데 그럴땐 과감히 JPQL로 해보자.
+- 실무 꿀팁 
+  - Api에서 Page<Member> page를 그대로 반환하면 안된다! 절대 엔티티를 외부에 노출하지 말자! DTO로 변환해서 보내야 한다!
+  - DTO 쉽게 변환하는 방법!
+    - Page<Member> page = memberRepository.findByAge(age, pageRequest);
+    - Page<MemberDto> toMap = page.map(member -> new MemberDto(member.getId(), member.getUsername(), null));
+      - DTO로 변환하였기 떄문에 반환해도 된다!
+    

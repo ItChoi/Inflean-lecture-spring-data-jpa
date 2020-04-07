@@ -10,6 +10,7 @@ spring:
       ddl-auto: create
     properties:
       hibernate:
+        dialect: org.hibernate.dialect.Oracle10gDialect
         # show_sql: true # JPA 실행 쿼리를 콘솔에 다 찍는다. 그러나 밑에 로그 파일로 남길 수 있는데 이게 더 좋다.
         format_sql: true
 
