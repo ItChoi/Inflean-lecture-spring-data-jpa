@@ -3,9 +3,8 @@ package study.datajpa.repository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
 import study.datajpa.dto.MemberDto;
@@ -325,6 +324,112 @@ class MemberRepositoryTest {
     @Test
     public void callCustom() {
         List<Member> result = memberRepository.findMemberCustom();
+    }
+
+    @Test
+    public void speBasic() {
+        //given
+        Team teamA = new Team("teamA");
+        em.persist(teamA);
+
+        Member m1 = new Member("m1", 0, teamA);
+        Member m2 = new Member("m2", 0, teamA);
+        em.persist(m1);
+        em.persist(m2);
+
+        //when
+        Specification<Member> spec = MemberSpec.username("m1").and(MemberSpec.teamName("teamA"));
+        List<Member> result = memberRepository.findAll(spec);
+
+        //then
+        assertThat(result.size()).isEqualTo(1);
+
+    }
+
+    @Test
+    public void queryByExample() {
+        //given
+        Team teamA = new Team("teamA");
+        em.persist(teamA);
+
+        Member m1 = new Member("m1", 0, teamA);
+        Member m2 = new Member("m2", 0, teamA);
+        em.persist(m1);
+        em.persist(m2);
+
+        em.flush();
+        em.clear();
+
+        //when
+        // Probe: 필드에 데이터가 있는 실제 도메인 객체
+        // ExampleMAtcher: 특정 필드를 일치시키는 상세한 정보 제공, 재사용 가능
+        // Example: Probe와 ExampleMatcher로 구성, 쿼리를 생성하는데 사용
+        Member member = new Member("m1"); // 엔티티 자체가 검색 조건
+        Team team = new Team("teamA");
+        member.setTeam(team);
+
+        ExampleMatcher matcher = ExampleMatcher.matching()
+                .withIgnorePaths("age");
+
+        Example<Member> example = Example.of(member, matcher);
+
+        List<Member> result = memberRepository.findAll(example); // 스프링 데이터에서 Example을 파라미터로 받는 것을 기본으로 넣었다.
+
+        //then
+        assertThat(result.get(0).getUsername()).isEqualTo("m1");
+    }
+
+    @Test
+    public void projections() {
+        //given
+        Team teamA = new Team("teamA");
+        em.persist(teamA);
+
+        Member m1 = new Member("m1", 0, teamA);
+        Member m2 = new Member("m2", 0, teamA);
+        em.persist(m1);
+        em.persist(m2);
+
+        em.flush();
+        em.clear();
+
+        //when
+        // List<UsernameOnly> result = memberRepository.findProjectionsByUsername("m1");
+        // List<UserNameOnlyDto> result = memberRepository.findProjectionsDtoByUsername("m1");
+        // List<UserNameOnlyDto> result = memberRepository.findProjectionsGenericByUsername("m1", UserNameOnlyDto.class);
+        List<NestedClosedProjections> result = memberRepository.findProjectionsGenericByUsername("m1", NestedClosedProjections.class);
+
+        //then
+        for (NestedClosedProjections usernameOnly : result) {
+            System.out.println("usernameOnly1: " + usernameOnly.getUsername());
+            System.out.println("usernameOnly2: " + usernameOnly.getTeam().getName());
+        }
+    }
+
+    @Test
+    public void nativeQuery() {
+        //given
+        Team teamA = new Team("teamA");
+        em.persist(teamA);
+
+        Member m1 = new Member("m1", 0, teamA);
+        Member m2 = new Member("m2", 0, teamA);
+        em.persist(m1);
+        em.persist(m2);
+
+        em.flush();
+        em.clear();
+
+        //when
+        Page<MemberProjection> result = memberRepository.findByNativeProjection(PageRequest.of(0, 10));
+
+        List<MemberProjection> content = result.getContent();
+
+        for (MemberProjection memberProjection : content) {
+            System.out.println("memberProjection1: " + memberProjection.getUsername());
+            System.out.println("memberProjection2: " + memberProjection.getTeamNAme());
+        }
+
     }
 
 }

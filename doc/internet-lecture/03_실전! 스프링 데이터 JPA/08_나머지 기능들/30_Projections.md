@@ -1,0 +1,48 @@
+## Projections
+- 약간 도움이 될 때가 있다. 들어두면 좋다
+- DB에서 엔티티만 조회하고 싶을 때도 있지만, 회원의 이름만 조회하고 싶을 때! (편하게 사용 가능하도록 - Projections)
+  - query의 select 절에 들어갈 data라고 보면 된다.
+- 엔티티 대신에 DTO를 편리하게 조회할 때 사용
+- 전체 엔티티가 아니라 만약 회원 이름만 조회하고 싶을 때 사용
+  - public interface UsernameOnly { String getUsername(); }
+    - 구현체는 만드는 게 아니라, 인터페이스만 만들면 된다.
+  - List<UsernameOnly> findProjectionsByUsername(@Param("username") String username); 
+    - 엔티티가 아니라 인터페이스에 프록시 객체가 담겨서 온다.
+    - 스프링 데이터 JPA가 프록시를 가지고 가짜를 만들어버린다.
+      - 인터페이스만 정의하면, 실제 구현체는 스프링 데이터 JPA가 username 속성만 있음 되겠구나 하고 구현체를 반환!
+      - 인터페이스 기반 closeProjections!
+- 인터페이스 기반 openProjections!
+  - public interface UsernameOnly { @Value("#{target.username + ' ' + target.age}") String getUsername(); }
+    - target: 여기선 멤버겠죠?
+    - username이랑 age를 둘 다 가져와서 문자를 더해서 넣어준다.
+    - 스프링 SPL 문법도 지원!
+  - 왜 openProjections이라고 하나?
+    - spl을 쓰면 멤버 엔티티를 다 가지고 온다. 거기에서 spl을 계산해야 하니까, 
+    - select 엔티티를 다 가져오고, 원하는 데이터를 찍어서 
+    - 이미 DB에서 퍼올리고, 애플리케이션에서 찍어서 계산
+- 장점
+  - 원하는 데이터만 가져올 수 있다.
+  
+- 클래스 기반의 Projections
+  - @Getter public class UserNameOnlyDto { private final String username; public UserNameOnlyDto(String username) { this.username = username; } }
+    - 생성자의 파라미터 이름으로 매칭시켜서 프로젝션이 가능하다.  
+
+- 최적화해서 가져 올 때 쓰면 유용할 수도 있다.
+- 동적 프로젝션도 가능! 
+  - <T> List<T> findProjectionsGenericByUsername(@Param("username") String username, Class<T> type);
+    - 어떨 땐 username만 가져오고 싶고, 어떨 땐 username과 뭐시기를 가져오고 싶을 때, 쿼리는 같지만 이렇게 사용하여 type만 바꾸면 된다.)
+
+- 중첩 구조 처리
+  - Member 뿐만 아니라 연관된 Team 가져오기
+  - public interface NestedClosedProjections { String getUsername(); TeamInfo getTeam(); interface TeamInfo { String getName(); } }
+    - 실행 시 쿼리를 잘 봐야 한다.
+  - 중첩 구조에서는 username은 최적화 되서 원하는 데이터만 가져오고, Team은 엔티티 자체를 가져온다(최적화가 안된다.)
+    - 조인이 들어가는 순간 조금씩 쓰기 애매해지는 경우가 있다.
+- 주의
+  - 프로젝션 대상이 root 엔티티면 JPQL select절 최적화 가능
+  - 프로젝션 대상이 root가 아니면, left outer join 처리, 모든 필드를 select 해서 엔티티로 조회한 다음 계산
+- 정리
+  - 프로젝션 대상이 root 엔티티면 대상
+  - root 엔티티 대상이 넘기면 최적화가 안된다. 
+  - 실무 복잡 쿼리 처리에는 한계가 있다.
+  - 실무에서는 단순할 때 사용하고, 조금만 복잡해지면 QueryDSL 사용!

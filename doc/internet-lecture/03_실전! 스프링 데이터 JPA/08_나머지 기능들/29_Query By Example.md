@@ -1,0 +1,35 @@
+## Query By Example
+- Probe: 필드에 데이터가 있는 실제 도메인 객체
+- ExampleMAtcher: 특정 필드를 일치시키는 상세한 정보 제공, 재사용 가능
+- Example: Probe와 ExampleMatcher로 구성, 쿼리를 생성하는데 사용
+- 스프링 데이터 JPA 최신 버전에 나온 기능!
+  - 실무에서 사용하기에 적합한가?
+    - 애매...하다...
+    - 엔티티 자체가 검색 조건
+      - Member member = new Member("m1");
+      - ExampleMatcher matcher = ExampleMatcher.matching() .withIgnorePaths("age"); // 모든 것이 검색 조건이 아니기 때문에 age 검색 조건은 무시
+        - null인건 검색 조건에서 무시하는데, 기본 타입을 무시하기 위함!
+      - Example<Member> example = Example.of(member);
+      - List<Member> result = memberRepository.findAll(example); // 스프링 데이터에서 Example을 파라미터로 받는 것을 기본으로 넣었다.
+    - 조인 해결이 애매하다. 
+      - innter join만 가능
+        - member.setTeam(team); // member name과 team의 name 매칭
+      - 복잡한 조인이 들어갈 때 결국 걷어내야한다.
+- 장점
+  - 동적 쿼리를 편리하게 사용
+  - 도메인 객체를 그대로 사용!! 
+  - 데이터 저장소를 RDB에서 NOSQL로 변경해도 코드 변경없이 추상화되어 있다. (패키지가 공통 쪽! common - 몽고 디비든 뭐든)
+  - 스프링 데이터 JPA - JpaRepository 인터페이스에 이미 포함되어 있다.
+- 단점
+  - 조인은 가능하지만 inner join만 가능...
+  - 중첩 제약조건 안된다. 
+    - ex) firstname = ?0 or (firstname = ?1 and lastname = ?2)
+  - 매칭 조건이 매우 단순함
+    - 문자는 starts/contains/ends/regex
+    - 다른 속성은 정확히 매칭 (=)만 지원 (정확히 매칭되는 것만!)
+- 정리
+  - 실무에서 사용하기엔 매칭 조건이 너무 단순, inner join이 안된다.
+    - outer join, left join 하나라도 들어간다면 다 버려야 한다.
+  - 나온 지 얼마 안되기도 했고 써보는 것도 뭐......
+      - 메뉴얼이 잘 되어 있고 예제도 잘 되어 있다.
+  - 실무에서는 QueryDSL 사용하면 다 해결이 된다!!!!
